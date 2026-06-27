@@ -1,0 +1,97 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22'
+  JAVA_VERSION: '17'
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Android SDK
+        run: |
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "/usr/local/lib/android/sdk/platform-tools" >> $GITHUB_PATH
+
+      - name: Install Android SDK platforms
+        run: |
+          SDK=/usr/local/lib/android/sdk
+          yes | $SDK/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK \
+            "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Install dependencies
+        run: pnpm install --no-audit --prefer-offline
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Expo Prebuild
+        run: npx expo prebuild --platform android --clean
+
+      - name: Fix Kotlin version
+        run: |
+          echo "android.kotlinVersion=1.9.24" >> android/gradle.properties
+          echo "=== Kotlin pinned ==="
+          grep kotlin android/gradle.properties
+
+      - name: Build debug APK
+        id: build_apk
+        run: |
+          cd android
+          echo "=== Gradle build start ==="
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
+          EC=${PIPESTATUS[0]}
+          if [ $EC -ne 0 ]; then
+            tail -80 /tmp/gradle.log
+            echo "::error::Gradle build failed with exit $EC"
+            exit $EC
+          fi
+          APK=$(find . -name "*.apk" -type f | head -1)
+          if [ -z "$APK" ]; then echo "::error::No APK found"; exit 1; fi
+          cp "$APK" ../juezhao-authenticator.apk
+          ls -lh ../juezhao-authenticator.apk
+          echo "APK_AVAILABLE=true" >> $GITHUB_OUTPUT
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: juezhao-authenticator-android-${{ github.run_number }}
+          path: juezhao-authenticator.apk
+          retention-days: 30
+        if: steps.build_apk.outputs.APK_AVAILABLE == 'true'
+
+      - name: Create Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes "觉照验证器 $TAG - RFC 6238 TOTP Authenticator" \
+            juezhao-authenticator.apk
