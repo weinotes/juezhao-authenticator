@@ -41,9 +41,7 @@ jobs:
             "platforms;android-35" "build-tools;35.0.0"
 
       - name: Install dependencies
-        run: |
-          npm install -g pnpm@11.9.0
-          pnpm install
+        run: npx --yes pnpm@11.9.0 install
 
       - name: Type check
         run: npx tsc --noEmit
