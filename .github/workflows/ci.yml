@@ -16,9 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@11 --activate
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -36,9 +35,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@11 --activate
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -53,15 +51,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@11 --activate
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - run: pnpm install
-      - name: npm audit
-        run: npm audit --audit-level=moderate
+      - run: pnpm install --frozen-lockfile
+      - name: pnpm audit
+        run: pnpm audit --audit-level=moderate
         continue-on-error: true
 
   compliance:
