@@ -52,8 +52,7 @@ jobs:
       - name: Fix Gradle config
         run: |
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
-          echo "=== gradle.properties ==="
-          grep -E "jvmargs" android/gradle.properties
+          echo "android.enableJetifier=true" >> android/gradle.properties
 
       - name: Build debug APK
         id: build_apk
@@ -63,7 +62,10 @@ jobs:
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
           EC=${PIPESTATUS[0]}
           if [ $EC -ne 0 ]; then
+            echo "=== Last 80 lines of Gradle log ==="
             tail -80 /tmp/gradle.log
+            echo "=== Last 20 lines of error search ==="
+            grep -i -E "error:|Error|FAILURE|What went wrong|FAIL|Compilation error" /tmp/gradle.log | tail -20
             echo "::error::Gradle build failed with exit $EC"
             exit $EC
           fi
@@ -72,6 +74,14 @@ jobs:
           cp "$APK" ../juezhao-authenticator.apk
           ls -lh ../juezhao-authenticator.apk
           echo "APK_AVAILABLE=true" >> $GITHUB_OUTPUT
+
+      - name: Upload build log (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-log-${{ github.run_number }}
+          path: /tmp/gradle.log
+          retention-days: 7
 
       - name: Upload APK
         uses: actions/upload-artifact@v7
