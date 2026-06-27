@@ -42,7 +42,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g pnpm@11
+          npm install -g pnpm@11.9.0
           pnpm install
 
       - name: Type check
