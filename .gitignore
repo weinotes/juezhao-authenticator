@@ -2,6 +2,7 @@
 
 node_modules/
 .expo/
+.next/
 dist/
 npm-debug.*
 *.jks

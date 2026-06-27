@@ -1,6 +1,0 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/add-manual/page": "app/add-manual/page.js",
-  "/scan/page": "app/scan/page.js",
-  "/page": "app/page.js"
-}
