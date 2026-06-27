@@ -10,9 +10,10 @@ env:
   NODE_VERSION: '22'
 
 jobs:
-  quality:
-    name: Type Check & Test
+  lint-and-typecheck:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,5 +24,80 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: npx tsc --noEmit
-      - run: npx jest --config jest.config.js
+      - name: TypeScript syntax check
+        run: npx tsc --noEmit
+      - name: ESLint
+        run: npx eslint --ext .ts,.tsx app/ src/ || echo "Lint warnings (non-blocking)"
+        continue-on-error: true
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Run Jest tests
+        run: npx jest --config jest.config.js
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: pnpm install
+      - name: npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  compliance:
+    name: Open Source Compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required files
+        run: |
+          echo "Checking open source compliance files..."
+          required=(
+            "LICENSE"
+            "README.md"
+            "README.zh-CN.md"
+            "CODE_OF_CONDUCT.md"
+            "CONTRIBUTING.md"
+            "SECURITY.md"
+            "SUPPORT.md"
+            "CHANGELOG.md"
+            ".gitignore"
+            ".github/ISSUE_TEMPLATE/bug_report.md"
+            ".github/ISSUE_TEMPLATE/feature_request.md"
+            ".github/PULL_REQUEST_TEMPLATE.md"
+          )
+          missing=0
+          for f in "${required[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "❌ MISSING: $f"
+              missing=$((missing + 1))
+            else
+              echo "✅ Found: $f"
+            fi
+          done
+          if [ $missing -gt 0 ]; then
+            echo "::warning::$missing required file(s) missing"
+            exit 1
+          fi
+          echo "✅ All compliance files present"

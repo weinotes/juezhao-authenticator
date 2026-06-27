@@ -1,0 +1,23 @@
+# JueZhao Authenticator pre-commit hook
+# Runs type check and tests before each commit
+# Per WORK_CONVENTIONS.md §1.2 — every repo must have pre-commit hooks
+
+echo "=== Pre-commit check: TypeScript ==="
+npx tsc --noEmit
+if [ $? -ne 0 ]; then
+  echo "❌ TypeScript check failed. Fix errors before committing."
+  exit 1
+fi
+echo "✅ TypeScript OK"
+
+echo ""
+echo "=== Pre-commit check: Unit tests ==="
+npx jest --config jest.config.js --silent
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Fix before committing."
+  exit 1
+fi
+echo "✅ Tests OK"
+
+echo ""
+echo "✅ Pre-commit checks passed"
