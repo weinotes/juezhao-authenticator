@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [main]
-    tags: ['v*']
+    tags: ['*']
   workflow_dispatch:
 
 env:
@@ -41,7 +41,9 @@ jobs:
             "platforms;android-35" "build-tools;35.0.0"
 
       - name: Install dependencies
-        run: npx --yes pnpm@11 install
+        run: |
+          npm install -g pnpm@11
+          pnpm install
 
       - name: Type check
         run: npx tsc --noEmit
