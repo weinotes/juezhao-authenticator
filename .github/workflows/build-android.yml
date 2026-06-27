@@ -22,8 +22,8 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Install pnpm via corepack
-        run: corepack enable && corepack prepare pnpm@11 --activate
+      - name: Install pnpm
+        run: npm install -g pnpm@11
 
       - name: Setup Java JDK 17
         uses: actions/setup-java@v4
