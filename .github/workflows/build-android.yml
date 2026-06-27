@@ -53,6 +53,8 @@ jobs:
         run: |
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
           echo "android.enableJetifier=true" >> android/gradle.properties
+          echo "=== gradle.properties ==="
+          grep -E "jvmargs|jetifier" android/gradle.properties
 
       - name: Build debug APK
         id: build_apk

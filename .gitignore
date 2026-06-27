@@ -11,10 +11,7 @@ npm-debug.*
 *.key
 *.mobileprovision
 *.orig.*
-web-build/
-android/.gradle/
-android/app/build/
-android/build/
+web-build/.gradle/app/build/build/
 ios/Pods/
 ios/build/
 *.tsbuildinfo
