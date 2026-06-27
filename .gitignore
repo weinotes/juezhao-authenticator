@@ -1,9 +1,24 @@
 # 觉照验证器 JueZhao Authenticator
 
 node_modules/
-.next/
-out/
-coverage/
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+android/.gradle/
+android/app/build/
+android/build/
+ios/Pods/
+ios/build/
 *.tsbuildinfo
-next-env.d.ts
+coverage/
 .DS_Store
+*.log
+.env
+.env.local

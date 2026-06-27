@@ -2,6 +2,7 @@
  * @file Secure TOTP Secret Storage
  * @description SecureStore + AsyncStorage for accounts
  * @author Davey Wong (wgwcko@gmail.com)
+ * @copyright 2026 Davey Wong <wgwcko@gmail.com>
  * @license Apache-2.0
  */
 

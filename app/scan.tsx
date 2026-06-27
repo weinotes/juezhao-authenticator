@@ -1,6 +1,7 @@
 /**
  * @file Scan QR Screen — Camera-based otpauth:// scanner
  * @author Davey Wong (wgwcko@gmail.com)
+ * @copyright 2026 Davey Wong <wgwcko@gmail.com>
  * @license Apache-2.0
  */
 
