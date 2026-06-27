@@ -51,10 +51,9 @@ jobs:
 
       - name: Fix Gradle config
         run: |
-          echo "android.kotlinVersion=1.9.24" >> android/gradle.properties
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
           echo "=== gradle.properties ==="
-          grep -E "kotlin|jvmargs" android/gradle.properties
+          grep -E "jvmargs" android/gradle.properties
 
       - name: Build debug APK
         id: build_apk
