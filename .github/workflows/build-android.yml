@@ -49,11 +49,12 @@ jobs:
       - name: Expo Prebuild
         run: npx expo prebuild --platform android --clean
 
-      - name: Fix Kotlin version
+      - name: Fix Gradle config
         run: |
           echo "android.kotlinVersion=1.9.24" >> android/gradle.properties
-          echo "=== Kotlin pinned ==="
-          grep kotlin android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+          echo "=== gradle.properties ==="
+          grep -E "kotlin|jvmargs" android/gradle.properties
 
       - name: Build debug APK
         id: build_apk
